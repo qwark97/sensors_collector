@@ -31,7 +31,10 @@ func main() {
 	// connect to DB
 	db, err = sql.Open("postgres", psqlInfo)
 	errHandle("Could not open DB connection", err)
-	defer db.Close()
+	defer func() {
+		err = db.Close()
+		errHandle("Could not close DB connection", err)
+	}()
 
 	err = db.Ping()
 	errHandle("Could not connect to DB", err)
