@@ -49,6 +49,6 @@ func main() {
 
 func errHandle(msg string, err error) {
 	if err != nil {
-		log.Panic(msg, err)
+		log.Panicln(msg+"\n", err)
 	}
 }
