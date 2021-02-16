@@ -9,17 +9,13 @@ import (
 )
 
 var (
-	dbConfigPath string = ".db_config.json"
+	dbConfigPath      = ".db_config.json"
+	sensorsConfigPath = ".sensors_config.json"
 )
 
 func main() {
-	// load configs
-	file, err := os.Open(dbConfigPath)
-	errHandle("Could not open provided DB config", err)
-
-	err = loadDBConfig(file)
-	errHandle("Could not load provided DB config", err)
-
+	// load all configs
+	loadConfigs()
 	psqlInfo := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		loadedDBConfig.Host,
@@ -29,29 +25,47 @@ func main() {
 		loadedDBConfig.Dbname)
 
 	// connect to DB
-	db, err = sql.Open("postgres", psqlInfo)
+	db, err := sql.Open("postgres", psqlInfo)
 	errHandle("Could not open DB connection", err)
 	defer func() {
 		err = db.Close()
 		errHandle("Could not close DB connection", err)
 	}()
-
 	err = db.Ping()
 	errHandle("Could not connect to DB", err)
 
-	fmt.Println("Successfully connected!")
-
-	// load sensors_config.json
+	dataToDBChan := make(chan measure)
 
 	// based on sensors_config start one or many collectors as a goroutines
 	// which will collect data and send it back via channel
+	for _, sensor := range loadedSensorsConfig {
+		go collectData(sensor, dataToDBChan)
+		log.Printf("INFO - start sensor: %s\n", sensor.Comment)
+	}
 
 	// infinite loop that will put data into db
-
+	for {
+		measurement, _ := <-dataToDBChan
+		go loadToDB(measurement)
+	}
 }
 
 func errHandle(msg string, err error) {
 	if err != nil {
 		log.Panicln(msg+"\n", err)
 	}
+}
+
+func loadConfigs() {
+	file, err := os.Open(dbConfigPath)
+	errHandle("Could not open provided DB config", err)
+
+	err = loadDBConfig(file)
+	errHandle("Could not load provided DB config", err)
+
+	file, err = os.Open(sensorsConfigPath)
+	errHandle("Could not open provided sensors config", err)
+
+	err = loadSensorsConfig(file)
+	errHandle("Could not load provided sensors config", err)
 }
