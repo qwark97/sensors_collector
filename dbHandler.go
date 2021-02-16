@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -16,4 +17,8 @@ func loadDBConfig(r io.Reader) error {
 		return err
 	}
 	return nil
+}
+
+func loadToDB(measurement measure) {
+	fmt.Println(measurement)
 }
