@@ -25,4 +25,9 @@ type measure struct {
 	Unit     string
 	Value    float32
 	SensorId string
+	Category string
+}
+
+type SQLInsertStatements struct {
+	Statements map[string]string
 }
