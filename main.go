@@ -32,7 +32,11 @@ func main() {
 		errHandle("Could not close DB connection", err)
 	}()
 	err = db.Ping()
-	errHandle("Could not connect to DB", err)
+	errHandle("Could not ping DB", err)
+
+	// load DB insert statements
+	insertStatements.Statements = make(map[string]string)
+	insertStatements.loadStatements()
 
 	dataToDBChan := make(chan measure)
 
@@ -46,7 +50,7 @@ func main() {
 	// infinite loop that will put data into db
 	for {
 		measurement, _ := <-dataToDBChan
-		go loadToDB(measurement)
+		go loadToDB(db, measurement)
 	}
 }
 
