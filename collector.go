@@ -52,6 +52,7 @@ func collectData(config sensorConfig, respChan chan measure) {
 			Unit:     config.Unit,
 			Value:    value,
 			SensorId: config.MACAddress,
+			Category: config.Category,
 		}
 		respChan <- measurementResponse
 		sleep := time.Duration(config.Frequency)

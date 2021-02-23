@@ -9,6 +9,7 @@ type sensorConfig struct {
 	Frequency  int32  `json:"frequency"`
 	Unit       string `json:"unit"`
 	MACAddress string `json:"mac_address"`
+	Category   string `json:"category"`
 }
 
 type dbConfig struct {
