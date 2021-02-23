@@ -3,12 +3,11 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 )
 
 var loadedDBConfig dbConfig
-var db *sql.DB
 
 func loadDBConfig(r io.Reader) error {
 	decoder := json.NewDecoder(r)
@@ -19,6 +18,16 @@ func loadDBConfig(r io.Reader) error {
 	return nil
 }
 
-func loadToDB(measurement measure) {
-	fmt.Println(measurement)
+func loadToDB(db *sql.DB, measurement measure) {
+	sqlStatement := insertStatements.getStatement(measurement.Category)
+	_, err := db.Exec(
+		sqlStatement,
+		measurement.Origin,
+		measurement.Unit,
+		measurement.Value,
+		measurement.SensorId,
+	)
+	if err != nil {
+		log.Println("ERROR - inserting into DB -", err)
+	}
 }
