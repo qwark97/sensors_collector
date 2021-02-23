@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	_ "github.com/lib/pq"
 	"log"
@@ -9,11 +10,15 @@ import (
 )
 
 var (
-	dbConfigPath      = ".db_config.json"
-	sensorsConfigPath = ".sensors_config.json"
+	dbConfigPath      *string
+	sensorsConfigPath *string
 )
 
 func main() {
+	dbConfigPath = flag.String("dbConfigPath", ".db_config.json", "Path to JSON DB config")
+	sensorsConfigPath = flag.String("sensorsConfigPath", ".sensors_config.json", "Path to JSON sensors config")
+	flag.Parse()
+
 	// load all configs
 	loadConfigs()
 	psqlInfo := fmt.Sprintf(
@@ -61,13 +66,13 @@ func errHandle(msg string, err error) {
 }
 
 func loadConfigs() {
-	file, err := os.Open(dbConfigPath)
+	file, err := os.Open(*dbConfigPath)
 	errHandle("Could not open provided DB config", err)
 
 	err = loadDBConfig(file)
 	errHandle("Could not load provided DB config", err)
 
-	file, err = os.Open(sensorsConfigPath)
+	file, err = os.Open(*sensorsConfigPath)
 	errHandle("Could not open provided sensors config", err)
 
 	err = loadSensorsConfig(file)
